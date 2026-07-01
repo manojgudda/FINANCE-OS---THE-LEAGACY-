@@ -73,8 +73,8 @@ DATABASES = {
 # 2. PyMongo connection for your Finance tracker data
 # Ensure your local MongoDB instance is running on the default port
 try:
-    MONGO_CLIENT = MongoClient('mongodb://localhost:27017/')
-    db = MONGO_CLIENT['finance_os_db']
+    MONGO_CLIENT = MongoClient('mongodb+srv://manojkumargudda9939_db_user:R9C6StqVK6MsBDzb@financeos-cluster.8746dpx.mongodb.net/financeos_db?appName=FinanceOS-Cluster')
+    db = MONGO_CLIENT['financeos_db']
     print("Connected to MongoDB successfully!")
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
