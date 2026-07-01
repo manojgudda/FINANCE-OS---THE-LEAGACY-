@@ -1,0 +1,17 @@
+asgiref==3.11.1
+beautifulsoup4==4.15.0
+certifi==2026.6.17
+charset-normalizer==3.4.7
+Django==6.0.3
+dnspython==2.8.0
+idna==3.18
+packaging==26.0
+pillow==12.1.1
+pymongo==4.16.0
+pytesseract==0.3.13
+requests==2.34.2
+soupsieve==2.8.4
+sqlparse==0.5.5
+typing_extensions==4.15.0
+tzdata==2025.3
+urllib3==2.7.0

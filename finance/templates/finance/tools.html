@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Tools — FinanceOS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        html { scrollbar-gutter: stable; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .navbar { border-bottom: 1px solid #27272a; padding: 1rem 0; background-color: rgba(9, 9, 11, 0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;}
+        .brand-logo { font-size: 1.25rem; font-weight: 800; color: #ffffff; text-decoration: none; }
+        .text-accent { color: #4ade80; }
+        
+        /* High Contrast Overrides */
+        .text-muted { color: #a1a1aa !important; } /* Fixes the invisible helper text */
+        .form-control::placeholder { color: #a1a1aa !important; opacity: 0.8; } /* Fixes the invisible placeholders */
+        .form-control, .form-select { background-color: #121212; border: 1px solid #27272a; color: white !important; padding: 0.75rem; border-radius: 8px; font-size: 0.95rem; }
+        .form-control:focus, .form-select:focus { background-color: #18181b; border-color: #4ade80; color: white; box-shadow: none; }
+
+        .card-custom { background-color: #09090b; border: 1px solid #27272a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .btn-accent { background-color: #4ade80; color: #000; font-weight: 600; padding: 0.6rem 1.25rem; border-radius: 8px; border: none; transition: all 0.2s; }
+        .btn-accent:hover { background-color: #22c55e; }
+        .btn-outline-dark-custom { border: 1px solid #27272a; color: #a1a1aa; background: transparent; padding: 0.5rem 1rem; border-radius: 8px; transition: 0.2s; }
+        .btn-outline-dark-custom:hover { color: #fff; background: #18181b; border-color: #3f3f46; }
+        .form-label { font-size: 0.85rem; color: #a1a1aa; }
+
+        /* Cart & Bill Items */
+        .list-item { border: 1px solid #27272a; background-color: #121212; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+        .progress { height: 6px; background-color: #18181b; border-radius: 50px; overflow: hidden; margin-top: 0.5rem;}
+    </style>
+</head>
+<body>
+
+<nav class="navbar mb-5">
+    <div class="container d-flex justify-content-between align-items-center" style="max-width: 1200px; height: 40px;">
+        <div class="d-flex align-items-center">
+            <a href="{% url 'dashboard' %}" class="brand-logo me-4">Finance<span class="text-accent">OS</span></a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'dashboard' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'dashboard' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Dashboard</a>
+                <a href="{% url 'budgets' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'budgets' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'budgets' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Budgets</a>
+                <a href="{% url 'tools' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tools' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tools' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Smart Tools</a>
+                <a href="{% url 'tracker' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tracker' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tracker' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Price Tracker</a>
+                <a href="{% url 'taxes' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'taxes' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'taxes' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Tax Hub</a>
+                <a href="{% url 'investments' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'investments' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'investments' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Investments</a>
+                <a href="{% url 'splits' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'splits' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'splits' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Split Bills</a>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3" style="height: 40px;">
+            {% if request.resolver_match.url_name == 'dashboard' %}
+            <button type="button" class="btn-accent" data-bs-toggle="modal" data-bs-target="#transactionModal" style="font-size: 0.85rem; padding: 0.4rem 0.85rem; font-weight: 600; border-radius: 6px; border: none; background-color: #4ade80; color: #000; transition: all 0.2s;">
+                + New Transaction
+            </button>
+            {% endif %}
+            <form method="POST" action="{% url 'logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm" style="border: 1px solid #27272a; color: #a1a1aa; background: transparent; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#3f3f46'" onmouseout="this.style.color='#a1a1aa'; this.style.borderColor='#27272a'">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5" style="max-width: 1200px;">
+    
+    <div class="row g-4">
+        <!-- Smart Cart (Affordability Engine) -->
+        <div class="col-lg-6">
+            <div class="card-custom h-100" style="background: linear-gradient(135deg, rgba(74, 222, 128, 0.02) 0%, rgba(9, 9, 11, 0.8) 100%); border: 1px solid rgba(74, 222, 128, 0.15); backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0 text-success d-flex align-items-center gap-2">
+                        <span>🛒</span> Smart Cart
+                    </h5>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1" style="font-size: 0.75rem;">Affordability Engine</span>
+                </div>
+                <p class="text-muted small mb-4">Current Available Balance: <strong class="text-white">₹{{ total_balance|floatformat:0 }}</strong></p>
+                
+                <form method="POST" class="mb-4 d-flex gap-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="smart_cart">
+                    <input type="text" name="item_name" class="form-control form-control-sm" placeholder="What do you want to buy?" required style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                    <input type="number" name="price" class="form-control form-control-sm w-25" placeholder="₹ Price" required style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                    <button type="submit" class="btn btn-sm btn-success" style="font-weight: 700; border-radius: 8px; padding: 0.5rem 1rem;">+</button>
+                </form>
+
+                <div class="d-flex flex-column gap-2" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                    {% for item in cart_items %}
+                        <div class="list-item p-3 rounded" style="background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.02); margin-bottom: 0.5rem;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold text-white">{{ item.item_name }}</span>
+                                <span class="fw-bold text-white">₹{{ item.price|floatformat:0 }}</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                {% if item.affordable %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1" style="font-size: 0.75rem;">Affordable ✅</span>
+                                {% else %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.75rem;">Need ₹{{ item.shortfall|floatformat:0 }} more</span>
+                                {% endif %}
+                                <span class="small text-muted" style="font-size: 0.75rem;">{{ item.progress|floatformat:0 }}% Saved</span>
+                            </div>
+                            
+                            <div class="progress mt-3" style="height: 6px; background-color: #18181b; border-radius: 50px;">
+                                <div class="progress-bar {% if item.affordable %}bg-success{% else %}bg-warning{% endif %}" style="width: {{ item.progress }}%"></div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted text-center small py-4">Your cart is empty.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recurring Bills (Auto-Pay) -->
+        <div class="col-lg-6">
+            <div class="card-custom h-100" style="background: linear-gradient(135deg, rgba(244, 63, 94, 0.02) 0%, rgba(9, 9, 11, 0.8) 100%); border: 1px solid rgba(244, 63, 94, 0.15); backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0 text-danger d-flex align-items-center gap-2">
+                        <span>📅</span> Recurring Bills
+                    </h5>
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.75rem;">Auto-Pay</span>
+                </div>
+                <p class="text-muted small mb-4">These will automatically deduct from your balance every month.</p>
+                
+                <form method="POST" class="mb-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="recurring_bill">
+                    <div class="row g-2 mb-2">
+                        <div class="col-7">
+                            <input type="text" name="title" class="form-control form-control-sm" placeholder="e.g., Netflix, Rent" required style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                        </div>
+                        <div class="col-5">
+                            <input type="number" name="amount" class="form-control form-control-sm" placeholder="₹ Amount" required style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-7">
+                            <select id="billCategory" name="category" class="form-select form-select-sm" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                                <option value="Bills">🧾 Bills</option>
+                                <option value="Entertainment">🍿 Entertainment</option>
+                                <option value="Other">✨ Other</option>
+                            </select>
+                        </div>
+                        <div class="col-5">
+                            <input type="number" name="billing_date" class="form-control form-control-sm" placeholder="Day (1-31)" min="1" max="31" required style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                        </div>
+                    </div>
+                    <div id="billCustomCategoryGroup" class="mb-2 d-none mt-2">
+                        <label class="form-label small text-muted">Specify Category</label>
+                        <input type="text" name="custom_category" class="form-control form-control-sm" placeholder="e.g., Go-Karting" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-danger w-100 mt-2" style="font-weight: 700; border-radius: 8px;">Activate Subscription</button>
+                </form>
+
+                <div class="d-flex flex-column gap-2" style="max-height: 350px; overflow-y: auto; padding-right: 5px;">
+                    {% for bill in recurring_bills %}
+                        <div class="list-item d-flex justify-content-between align-items-center p-3 rounded" style="background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.02); margin-bottom: 0.5rem;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="fs-4">🔄</div>
+                                <div>
+                                    <div class="fw-bold text-white">{{ bill.title }}</div>
+                                    <div class="text-muted small">Auto-pays on the {{ bill.billing_date }}th</div>
+                                </div>
+                            </div>
+                            <div class="fw-bold text-danger">−₹{{ bill.amount|floatformat:0 }}</div>
+                        </div>
+                    {% empty %}
+                        <p class="text-muted text-center small py-4">No active subscriptions.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debt Payoff Strategist Row -->
+    <div class="row g-4 mt-2">
+        <div class="col-12">
+            <div class="card-custom" style="background: linear-gradient(135deg, rgba(20, 20, 35, 0.4) 0%, rgba(9, 9, 11, 0.8) 100%); border: 1px solid rgba(129, 140, 248, 0.15); backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); transition: transform 0.2s; cursor: default;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                
+                <!-- Card Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="fw-bold mb-1 text-primary d-flex align-items-center gap-2">
+                            <span>💸</span> Debt Payoff Strategist
+                        </h5>
+                        <p class="text-muted small mb-0">Compare the Snowball and Avalanche methods to find your fastest route to financial freedom.</p>
+                    </div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1" style="font-size: 0.75rem;">Snowball vs. Avalanche</span>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Left Panel: Add & Manage Debts -->
+                    <div class="col-lg-4 border-end border-secondary border-opacity-25 pe-lg-4">
+                        <h6 class="fw-bold text-white mb-3">Accounts</h6>
+                        
+                        <form method="POST" class="mb-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="add_debt">
+                            <div class="mb-2">
+                                <input type="text" name="name" class="form-control form-control-sm" placeholder="Account Name (e.g., Credit Card A)" required style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-4">
+                                    <input type="number" name="balance" class="form-control form-control-sm" placeholder="Balance (₹)" required min="1" step="0.01" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                                </div>
+                                <div class="col-4">
+                                    <input type="number" name="apr" class="form-control form-control-sm" placeholder="APR (%)" required min="0" step="0.01" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                                </div>
+                                <div class="col-4">
+                                    <input type="number" name="min_payment" class="form-control form-control-sm" placeholder="Min (₹)" required min="0" step="0.01" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-sm w-100" style="background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%); color: #fff; font-weight: 600; border: none; border-radius: 8px; padding: 0.4rem; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">+ Add Debt</button>
+                        </form>
+
+                        <div style="max-height: 240px; overflow-y: auto; padding-right: 5px;">
+                            {% for debt in debts %}
+                                <div class="list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded" style="background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
+                                    <div>
+                                        <div class="fw-bold text-white" style="font-size: 0.9rem;">{{ debt.name }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">APR: {{ debt.apr }}% | Min: ₹{{ debt.min_payment|floatformat:0 }}</div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="fw-bold text-danger" style="font-size: 0.9rem;">₹{{ debt.balance|floatformat:0 }}</div>
+                                        <form method="POST" class="m-0">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="form_type" value="delete_debt">
+                                            <input type="hidden" name="debt_id" value="{{ debt.id }}">
+                                            <button type="submit" class="btn btn-sm text-danger p-0 border-0 bg-transparent" style="font-size: 1.15rem; line-height: 1;">&times;</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <p class="text-muted text-center small py-4">No debt accounts added yet.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Projections & Chart -->
+                    <div class="col-lg-8 ps-lg-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold text-white mb-0">Projection Comparison</h6>
+                            <form method="GET" class="d-flex align-items-center gap-2">
+                                <label class="small text-muted text-nowrap mb-0" style="font-size: 0.75rem;">Extra Monthly Payment:</label>
+                                <input type="number" name="extra_payment" value="{{ extra_payment|floatformat:0 }}" class="form-control form-control-sm text-center" style="width: 80px; background-color: rgba(0,0,0,0.2); border-color: #27272a;" min="0" step="100">
+                                <button type="submit" class="btn btn-sm btn-outline-primary" style="border-color: rgba(129, 140, 248, 0.3); color: #818cf8; font-size: 0.75rem; padding: 0.25rem 0.5rem;">Recalc</button>
+                            </form>
+                        </div>
+
+                        {% if debts %}
+                            <div class="row g-2 mb-4">
+                                <div class="col-4">
+                                    <div class="p-2.5 rounded border border-secondary border-opacity-25 bg-black bg-opacity-20 text-center" style="border-color: rgba(255, 255, 255, 0.05);">
+                                        <div class="text-muted small mb-1" style="font-size: 0.75rem;">Snowball Payoff</div>
+                                        <div class="fw-bold text-white fs-6">{{ snowball_months }} mos</div>
+                                        <div class="text-muted small" style="font-size: 0.7rem;">₹{{ snowball_interest|floatformat:0 }} interest</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2.5 rounded border border-secondary border-opacity-25 bg-black bg-opacity-20 text-center" style="border-color: rgba(255, 255, 255, 0.05);">
+                                        <div class="text-muted small mb-1" style="font-size: 0.75rem;">Avalanche Payoff</div>
+                                        <div class="fw-bold text-white fs-6">{{ avalanche_months }} mos</div>
+                                        <div class="text-muted small" style="font-size: 0.7rem;">₹{{ avalanche_interest|floatformat:0 }} interest</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2.5 rounded border border-primary border-opacity-25 bg-primary bg-opacity-5 text-center" style="border-color: rgba(129, 140, 248, 0.2);">
+                                        <div class="text-primary small mb-1" style="font-size: 0.75rem;">Interest Saved</div>
+                                        <div class="fw-bold text-primary fs-6">₹{{ interest_saved|floatformat:0 }}</div>
+                                        <div class="text-muted small" style="font-size: 0.7rem;">via Avalanche</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="position: relative; height: 230px; width: 100%;">
+                                <canvas id="debtChart"></canvas>
+                            </div>
+                        {% else %}
+                            <div class="d-flex flex-column align-items-center justify-content-center h-100 py-5">
+                                <span class="fs-1 mb-2">📊</span>
+                                <p class="text-muted text-center small">Add your debt accounts in the left panel to generate the payoff timeline comparisons.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+{% if debts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const snowballData = {{ snowball_timeline_json|safe }};
+        const avalancheData = {{ avalanche_timeline_json|safe }};
+        
+        // Generate labels (months)
+        const maxMonths = Math.max(snowballData.length, avalancheData.length);
+        const labels = Array.from({length: maxMonths}, (_, i) => 'Month ' + i);
+        
+        // Map data
+        const snowballBalances = labels.map((_, idx) => {
+            const dataPoint = snowballData[idx];
+            return dataPoint ? dataPoint.total_balance : 0;
+        });
+        const avalancheBalances = labels.map((_, idx) => {
+            const dataPoint = avalancheData[idx];
+            return dataPoint ? dataPoint.total_balance : 0;
+        });
+        
+        const ctx = document.getElementById('debtChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Snowball Method',
+                        data: snowballBalances,
+                        borderColor: '#f87171',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Avalanche Method',
+                        data: avalancheBalances,
+                        borderColor: '#4ade80',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#a1a1aa', font: { family: 'Inter' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#a1a1aa', font: { family: 'Inter' } },
+                        grid: { color: '#27272a' }
+                    },
+                    y: {
+                        ticks: { color: '#a1a1aa', font: { family: 'Inter' } },
+                        grid: { color: '#27272a' }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+
+{% if messages %}
+    <script>
+        {% for message in messages %}
+            Swal.fire({ title: "Success!", text: "{{ message }}", icon: "success", background: '#09090b', color: '#ffffff', confirmButtonColor: '#4ade80', timer: 2500, showConfirmButton: false });
+        {% endfor %}
+    </script>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Custom Category Toggle
+    function setupCustomCategory(selectId, groupId) {
+        const select = document.getElementById(selectId);
+        const group = document.getElementById(groupId);
+        if (select && group) {
+            select.addEventListener('change', function() {
+                if (this.value === 'Other') {
+                    group.classList.remove('d-none');
+                    group.querySelector('input').setAttribute('required', 'required');
+                } else {
+                    group.classList.add('d-none');
+                    group.querySelector('input').removeAttribute('required');
+                    group.querySelector('input').value = '';
+                }
+            });
+        }
+    }
+    setupCustomCategory('billCategory', 'billCustomCategoryGroup');
+
+    // 1. Inject CSS for hover dropdowns
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .nav-item-container {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-preview-dropdown {
+            display: block;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            width: 280px;
+            background: linear-gradient(135deg, #09090b 0%, #121215 100%);
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 2000;
+            text-align: left;
+            margin-top: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .nav-item-container:hover .nav-preview-dropdown {
+            pointer-events: auto;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .nav-preview-dropdown hr {
+            border-color: #27272a;
+            margin: 0.5rem 0;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Fetch preview data
+    fetch('/api/nav-preview/')
+        .then(response => response.json())
+        .then(data => {
+            // Find all navbar links
+            const links = document.querySelectorAll('.navbar a.btn-sm, .navbar a.btn');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+                let dropdownHtml = '';
+                
+                if (href.includes('/dashboard/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">💼 DASHBOARD PREVIEW</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">Available:</span><span class="text-white fw-bold">₹${data.dashboard.balance}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-success">Income:</span><span class="text-success fw-bold">+₹${data.dashboard.income}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-danger">Expenses:</span><span class="text-danger fw-bold">−₹${data.dashboard.expense}</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-warning">Tax Shield:</span><span class="text-warning fw-bold">₹${data.dashboard.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/budgets/')) {
+                    const budgetItems = data.budgets.map(b => `
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small mb-1" style="font-size: 0.75rem;">
+                                <span class="text-white">${b.category}</span>
+                                <span class="text-muted">₹${b.spent}/₹${b.limit}</span>
+                            </div>
+                            <div class="progress" style="height: 4px; background: #18181b;">
+                                <div class="progress-bar ${b.pct > 90 ? 'bg-danger' : b.pct > 70 ? 'bg-warning' : 'bg-success'}" style="width: ${b.pct}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📊 BUDGETS PREVIEW</div>
+                            ${budgetItems || '<div class="text-muted small text-center py-2">No budgets set</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/tools/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🛠️ SMART TOOLS</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">🛒 Smart Cart:</span><span class="text-white fw-bold">${data.tools.cart_count} items</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">💸 Debts:</span><span class="text-white fw-bold">${data.tools.debts_count} accounts</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">🧾 Auto-Pay Bills:</span><span class="text-white fw-bold">${data.tools.bills_count} active</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/tracker/')) {
+                    const trackerItems = data.tracker.map(t => `
+                        <div class="d-flex justify-content-between mb-1 small" style="font-size: 0.75rem;">
+                            <span class="text-truncate text-white" style="max-width: 160px;">${t.title}</span>
+                            <span class="text-success fw-bold">₹${t.price}</span>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🏷️ PRICE TRACKER</div>
+                            ${trackerItems || '<div class="text-muted small text-center py-2">No products tracked</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/taxes/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🧾 TAX HUB</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Freelance Shield:</span><span class="text-warning fw-bold">₹${data.taxes.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/investments/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📈 INVESTMENTS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Holdings:</span><span class="text-white fw-bold">${data.investments.holdings_count} active assets</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/splits/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">👥 SPLIT BILLS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Owed to Me:</span><span class="text-success fw-bold">₹${data.splits.total_owed}</span></div>
+                        </div>
+                    `;
+                }
+
+                if (dropdownHtml) {
+                    // Wrap the link in a container
+                    const container = document.createElement('div');
+                    container.className = 'nav-item-container';
+                    link.parentNode.insertBefore(container, link);
+                    container.appendChild(link);
+                    container.insertAdjacentHTML('beforeend', dropdownHtml);
+                }
+            });
+        })
+        .catch(err => console.error('Error loading navbar previews:', err));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Hub — FinanceOS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        html { scrollbar-gutter: stable; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .navbar { border-bottom: 1px solid #27272a; padding: 1rem 0; background-color: rgba(9, 9, 11, 0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;}
+        .brand-logo { font-size: 1.25rem; font-weight: 800; color: #ffffff; text-decoration: none; }
+        .text-accent { color: #4ade80; }
+        
+        .card-custom { background-color: #09090b; border: 1px solid #27272a; border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; height: 100%; }
+        
+        .text-muted { color: #a1a1aa !important; }
+        .form-label { font-size: 0.85rem; color: #a1a1aa; font-weight: 500; }
+        .form-control::placeholder { color: #52525b !important; }
+        .form-control, .form-select { background-color: #121212; border: 1px solid #27272a; color: white !important; padding: 0.8rem 1rem; border-radius: 8px; font-size: 1rem; }
+        .form-control:focus, .form-select:focus { background-color: #18181b; border-color: #4ade80; color: white; box-shadow: none; }
+
+        .result-box { background-color: #121212; border: 1px solid #27272a; border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; }
+        .result-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem; }
+        .result-row.total { border-top: 1px solid #27272a; padding-top: 0.75rem; font-size: 1.15rem; font-weight: 700; margin-bottom: 0; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar mb-5">
+    <div class="container d-flex justify-content-between align-items-center" style="max-width: 1200px; height: 40px;">
+        <div class="d-flex align-items-center">
+            <a href="{% url 'dashboard' %}" class="brand-logo me-4">Finance<span class="text-accent">OS</span></a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'dashboard' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'dashboard' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Dashboard</a>
+                <a href="{% url 'budgets' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'budgets' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'budgets' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Budgets</a>
+                <a href="{% url 'tools' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tools' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tools' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Smart Tools</a>
+                <a href="{% url 'tracker' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tracker' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tracker' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Price Tracker</a>
+                <a href="{% url 'taxes' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'taxes' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'taxes' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Tax Hub</a>
+                <a href="{% url 'investments' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'investments' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'investments' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Investments</a>
+                <a href="{% url 'splits' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'splits' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'splits' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Split Bills</a>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3" style="height: 40px;">
+            {% if request.resolver_match.url_name == 'dashboard' %}
+            <button type="button" class="btn-accent" data-bs-toggle="modal" data-bs-target="#transactionModal" style="font-size: 0.85rem; padding: 0.4rem 0.85rem; font-weight: 600; border-radius: 6px; border: none; background-color: #4ade80; color: #000; transition: all 0.2s;">
+                + New Transaction
+            </button>
+            {% endif %}
+            <form method="POST" action="{% url 'logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm" style="border: 1px solid #27272a; color: #a1a1aa; background: transparent; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#3f3f46'" onmouseout="this.style.color='#a1a1aa'; this.style.borderColor='#27272a'">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5" style="max-width: 1200px;">
+    
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card-custom">
+                <h4 class="fw-bold mb-1">🧮 GST Calculator</h4>
+                <p class="text-muted small mb-4">Instantly calculate exclusive or inclusive GST.</p>
+                
+                <div class="mb-3">
+                    <label class="form-label">Calculation Type</label>
+                    <select id="gstType" class="form-select">
+                        <option value="exclusive">Add GST (Exclusive)</option>
+                        <option value="inclusive">Remove GST (Inclusive)</option>
+                    </select>
+                </div>
+
+                <div class="row g-3 mb-2">
+                    <div class="col-8">
+                        <label class="form-label">Amount (₹)</label>
+                        <input type="number" id="gstBase" class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Rate</label>
+                        <select id="gstRate" class="form-select">
+                            <option value="5">5%</option>
+                            <option value="12">12%</option>
+                            <option value="18" selected>18%</option>
+                            <option value="28">28%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-row text-muted"><span>Net Amount:</span> <span id="gstNet">₹0.00</span></div>
+                    <div class="result-row text-muted"><span>GST Amount (CGST/SGST):</span> <span id="gstTaxAmount">₹0.00</span></div>
+                    <div class="result-row total text-accent"><span>Final Total:</span> <span id="gstTotal">₹0.00</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card-custom">
+                <h4 class="fw-bold mb-1">🏛️ Income Tax Return (ITR) Estimator</h4>
+                <p class="text-muted small mb-4">Estimate your taxes based on the New Tax Regime slabs.</p>
+                
+                <div class="row g-3 mb-2">
+                    <div class="col-md-6">
+                        <label class="form-label">Annual Salary / Income (₹)</label>
+                        <input type="number" id="itrIncome" class="form-control" placeholder="0.00">
+                    </div>
+                    <div class="col-md-6">
+        <label class="form-label">Standard Deduction (₹)</label>
+        <input type="number" id="itrStdDed" class="form-control text-muted" value="50000">
+    </div>
+                </div>
+
+                <div class="result-box mt-4">
+                    <div class="result-row text-muted"><span>Gross Total Income:</span> <span id="itrGross">₹0.00</span></div>
+                    <div class="result-row text-muted"><span>Taxable Income (After Deductions):</span> <span id="itrTaxable">₹0.00</span></div>
+                    <div class="result-row text-muted"><span>Income Tax Computed:</span> <span id="itrComputed">₹0.00</span></div>
+                    <div class="result-row text-success" id="rebateRow"><span>Rebate u/s 87A (Income ≤ ₹7L):</span> <span id="itrRebate">-₹0.00</span></div>
+                    <div class="result-row text-muted"><span>Health & Education Cess (4%):</span> <span id="itrCess">₹0.00</span></div>
+                    <div class="result-row total text-danger mt-3"><span>Total Estimated Tax Payable:</span> <span id="itrFinalTax">₹0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- GST LOGIC ---
+    const gstType = document.getElementById('gstType');
+    const gstBase = document.getElementById('gstBase');
+    const gstRate = document.getElementById('gstRate');
+    
+    function calcGST() {
+        let amount = parseFloat(gstBase.value) || 0;
+        let rate = parseFloat(gstRate.value);
+        let type = gstType.value;
+        let net = 0, tax = 0, total = 0;
+
+        if (type === 'exclusive') {
+            net = amount;
+            tax = amount * (rate / 100);
+            total = net + tax;
+        } else {
+            total = amount;
+            net = amount / (1 + (rate / 100));
+            tax = total - net;
+        }
+
+        document.getElementById('gstNet').innerText = '₹' + net.toFixed(2);
+        document.getElementById('gstTaxAmount').innerText = '₹' + tax.toFixed(2);
+        document.getElementById('gstTotal').innerText = '₹' + total.toFixed(2);
+    }
+    
+    gstBase.addEventListener('input', calcGST);
+    gstRate.addEventListener('change', calcGST);
+    gstType.addEventListener('change', calcGST);
+
+    // --- ITR LOGIC (New Regime Rules) ---
+    const itrIncome = document.getElementById('itrIncome');
+    const itrStdDed = document.getElementById('itrStdDed'); // New listener
+    
+    function calcITR() {
+        let gross = parseFloat(itrIncome.value) || 0;
+        let stdDeduction = parseFloat(itrStdDed.value) || 0; // Grabs your custom value
+        let taxable = Math.max(0, gross - stdDeduction);
+        
+        let tax = 0;
+
+        // New Regime Slabs
+        if (taxable > 300000) { tax += Math.min(taxable - 300000, 300000) * 0.05; }
+        if (taxable > 600000) { tax += Math.min(taxable - 600000, 300000) * 0.10; }
+        if (taxable > 900000) { tax += Math.min(taxable - 900000, 300000) * 0.15; }
+        if (taxable > 1200000) { tax += Math.min(taxable - 1200000, 300000) * 0.20; }
+        if (taxable > 1500000) { tax += (taxable - 1500000) * 0.30; }
+
+        let computedTax = tax;
+        let rebate = 0;
+
+        // Rebate u/s 87A
+        if (taxable <= 700000) {
+            rebate = computedTax;
+            tax = 0;
+            document.getElementById('rebateRow').style.display = 'flex';
+        } else {
+            document.getElementById('rebateRow').style.display = 'none';
+        }
+
+        let cess = tax * 0.04;
+        let finalTax = tax + cess;
+
+        document.getElementById('itrGross').innerText = '₹' + gross.toFixed(2);
+        document.getElementById('itrTaxable').innerText = '₹' + taxable.toFixed(2);
+        document.getElementById('itrComputed').innerText = '₹' + computedTax.toFixed(2);
+        document.getElementById('itrRebate').innerText = '-₹' + rebate.toFixed(2);
+        document.getElementById('itrCess').innerText = '₹' + cess.toFixed(2);
+        
+        let finalTaxEl = document.getElementById('itrFinalTax');
+        finalTaxEl.innerText = '₹' + finalTax.toFixed(2);
+        finalTaxEl.className = finalTax > 0 ? 'text-danger' : 'text-success';
+    }
+
+    // Trigger calculation when EITHER box is changed
+    itrIncome.addEventListener('input', calcITR);
+    itrStdDed.addEventListener('input', calcITR);
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Inject CSS for hover dropdowns
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .nav-item-container {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-preview-dropdown {
+            display: block;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            width: 280px;
+            background: linear-gradient(135deg, #09090b 0%, #121215 100%);
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 2000;
+            text-align: left;
+            margin-top: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .nav-item-container:hover .nav-preview-dropdown {
+            pointer-events: auto;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .nav-preview-dropdown hr {
+            border-color: #27272a;
+            margin: 0.5rem 0;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Fetch preview data
+    fetch('/api/nav-preview/')
+        .then(response => response.json())
+        .then(data => {
+            // Find all navbar links
+            const links = document.querySelectorAll('.navbar a.btn-sm, .navbar a.btn');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+                let dropdownHtml = '';
+                
+                if (href.includes('/dashboard/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">💼 DASHBOARD PREVIEW</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">Available:</span><span class="text-white fw-bold">₹${data.dashboard.balance}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-success">Income:</span><span class="text-success fw-bold">+₹${data.dashboard.income}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-danger">Expenses:</span><span class="text-danger fw-bold">−₹${data.dashboard.expense}</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-warning">Tax Shield:</span><span class="text-warning fw-bold">₹${data.dashboard.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/budgets/')) {
+                    const budgetItems = data.budgets.map(b => `
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small mb-1" style="font-size: 0.75rem;">
+                                <span class="text-white">${b.category}</span>
+                                <span class="text-muted">₹${b.spent}/₹${b.limit}</span>
+                            </div>
+                            <div class="progress" style="height: 4px; background: #18181b;">
+                                <div class="progress-bar ${b.pct > 90 ? 'bg-danger' : b.pct > 70 ? 'bg-warning' : 'bg-success'}" style="width: ${b.pct}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📊 BUDGETS PREVIEW</div>
+                            ${budgetItems || '<div class="text-muted small text-center py-2">No budgets set</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/tools/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🛠️ SMART TOOLS</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">🛒 Smart Cart:</span><span class="text-white fw-bold">${data.tools.cart_count} items</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">💸 Debts:</span><span class="text-white fw-bold">${data.tools.debts_count} accounts</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">🧾 Auto-Pay Bills:</span><span class="text-white fw-bold">${data.tools.bills_count} active</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/tracker/')) {
+                    const trackerItems = data.tracker.map(t => `
+                        <div class="d-flex justify-content-between mb-1 small" style="font-size: 0.75rem;">
+                            <span class="text-truncate text-white" style="max-width: 160px;">${t.title}</span>
+                            <span class="text-success fw-bold">₹${t.price}</span>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🏷️ PRICE TRACKER</div>
+                            ${trackerItems || '<div class="text-muted small text-center py-2">No products tracked</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/taxes/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🧾 TAX HUB</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Freelance Shield:</span><span class="text-warning fw-bold">₹${data.taxes.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/investments/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📈 INVESTMENTS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Holdings:</span><span class="text-white fw-bold">${data.investments.holdings_count} active assets</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/splits/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">👥 SPLIT BILLS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Owed to Me:</span><span class="text-success fw-bold">₹${data.splits.total_owed}</span></div>
+                        </div>
+                    `;
+                }
+
+                if (dropdownHtml) {
+                    // Wrap the link in a container
+                    const container = document.createElement('div');
+                    container.className = 'nav-item-container';
+                    link.parentNode.insertBefore(container, link);
+                    container.appendChild(link);
+                    container.insertAdjacentHTML('beforeend', dropdownHtml);
+                }
+            });
+        })
+        .catch(err => console.error('Error loading navbar previews:', err));
+});
+</script>
+</body>
+</html>

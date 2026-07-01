@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ledger — FinanceOS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        html { scrollbar-gutter: stable; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        .navbar { border-bottom: 1px solid #27272a; padding: 1rem 0; background-color: rgba(9, 9, 11, 0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;}
+        .brand-logo { font-size: 1.25rem; font-weight: 800; color: #ffffff; text-decoration: none; }
+        .text-accent { color: #4ade80; }
+        
+        /* STRICT VISIBILITY OVERRIDES */
+        .text-muted { color: #a1a1aa !important; }
+        .card-custom { background-color: #09090b; border: 1px solid #27272a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .btn-accent { background-color: #4ade80; color: #000; font-weight: 600; padding: 0.5rem 1.25rem; border-radius: 8px; border: none; text-decoration: none; transition: 0.2s; }
+        .btn-accent:hover { background-color: #22c55e; color: #000; }
+        
+        /* Brightened Table Styling */
+        .table-dark { background-color: transparent; color: #ffffff; }
+        .table-dark th { background-color: #121212; color: #ffffff !important; border-bottom: 1px solid #3f3f46; font-weight: 600; padding: 1.2rem 1rem; letter-spacing: 0.5px; }
+        .table-dark td { background-color: transparent; border-bottom: 1px solid #27272a; padding: 1.2rem 1rem; vertical-align: middle; color: #e4e4e7; }
+        
+        /* New Brighter Badges */
+        .badge-category { background-color: #18181b; color: #d4d4d8; border: 1px solid #3f3f46; padding: 0.4rem 0.7rem; border-radius: 6px; font-weight: 500; font-size: 0.85rem;}
+        
+        .btn-delete { color: #f87171; background: transparent; border: 1px solid #f87171; border-radius: 6px; padding: 0.3rem 0.8rem; font-size: 0.85rem; transition: 0.2s; }
+        .btn-delete:hover { background: #f87171; color: #000; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar mb-5">
+    <div class="container d-flex justify-content-between align-items-center" style="max-width: 1200px; height: 40px;">
+        <div class="d-flex align-items-center">
+            <a href="{% url 'dashboard' %}" class="brand-logo me-4">Finance<span class="text-accent">OS</span></a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'dashboard' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'dashboard' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Dashboard</a>
+                <a href="{% url 'budgets' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'budgets' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'budgets' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Budgets</a>
+                <a href="{% url 'tools' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tools' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tools' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Smart Tools</a>
+                <a href="{% url 'tracker' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tracker' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tracker' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Price Tracker</a>
+                <a href="{% url 'taxes' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'taxes' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'taxes' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Tax Hub</a>
+                <a href="{% url 'investments' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'investments' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'investments' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Investments</a>
+                <a href="{% url 'splits' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'splits' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'splits' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Split Bills</a>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3" style="height: 40px;">
+            {% if request.resolver_match.url_name == 'dashboard' %}
+            <button type="button" class="btn-accent" data-bs-toggle="modal" data-bs-target="#transactionModal" style="font-size: 0.85rem; padding: 0.4rem 0.85rem; font-weight: 600; border-radius: 6px; border: none; background-color: #4ade80; color: #000; transition: all 0.2s;">
+                + New Transaction
+            </button>
+            {% endif %}
+            <form method="POST" action="{% url 'logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm" style="border: 1px solid #27272a; color: #a1a1aa; background: transparent; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#3f3f46'" onmouseout="this.style.color='#a1a1aa'; this.style.borderColor='#27272a'">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5" style="max-width: 1200px;">
+    
+    <div class="card-custom">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h5 class="fw-bold mb-0">Master Ledger</h5>
+                <p class="text-muted small mb-0 mt-1">Review, delete, or export your complete financial history.</p>
+            </div>
+            <a href="{% url 'export' %}" class="btn-accent">📥 Export to CSV</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transactions %}
+                    <tr>
+                        <td class="text-muted">{{ t.date|date:"M d, Y" }}</td>
+                        <td class="fw-bold">{{ t.title }}</td>
+                        <td><span class="badge-category">{{ t.category }}</span></td>
+                        <td class="{% if t.type == 'income' %}text-success{% else %}text-danger{% endif %} fw-bold">
+                            {% if t.type == 'income' %}+{% else %}−{% endif %}₹{{ t.amount|floatformat:2 }}
+                        </td>
+                        <td class="text-end">
+                            <form method="POST" action="{% url 'transactions' %}" class="m-0" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="delete_id" value="{{ t.id }}">
+                                <button type="submit" class="btn-delete">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">No transactions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+    <script>
+        {% for message in messages %}
+            Swal.fire({ title: "Updated!", text: "{{ message }}", icon: "success", background: '#09090b', color: '#ffffff', confirmButtonColor: '#4ade80', timer: 2000, showConfirmButton: false });
+        {% endfor %}
+    </script>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Inject CSS for hover dropdowns
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .nav-item-container {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-preview-dropdown {
+            display: block;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            width: 280px;
+            background: linear-gradient(135deg, #09090b 0%, #121215 100%);
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 2000;
+            text-align: left;
+            margin-top: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .nav-item-container:hover .nav-preview-dropdown {
+            pointer-events: auto;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .nav-preview-dropdown hr {
+            border-color: #27272a;
+            margin: 0.5rem 0;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Fetch preview data
+    fetch('/api/nav-preview/')
+        .then(response => response.json())
+        .then(data => {
+            // Find all navbar links
+            const links = document.querySelectorAll('.navbar a.btn-sm, .navbar a.btn');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+                let dropdownHtml = '';
+                
+                if (href.includes('/dashboard/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">💼 DASHBOARD PREVIEW</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">Available:</span><span class="text-white fw-bold">₹${data.dashboard.balance}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-success">Income:</span><span class="text-success fw-bold">+₹${data.dashboard.income}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-danger">Expenses:</span><span class="text-danger fw-bold">−₹${data.dashboard.expense}</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-warning">Tax Shield:</span><span class="text-warning fw-bold">₹${data.dashboard.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/budgets/')) {
+                    const budgetItems = data.budgets.map(b => `
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small mb-1" style="font-size: 0.75rem;">
+                                <span class="text-white">${b.category}</span>
+                                <span class="text-muted">₹${b.spent}/₹${b.limit}</span>
+                            </div>
+                            <div class="progress" style="height: 4px; background: #18181b;">
+                                <div class="progress-bar ${b.pct > 90 ? 'bg-danger' : b.pct > 70 ? 'bg-warning' : 'bg-success'}" style="width: ${b.pct}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📊 BUDGETS PREVIEW</div>
+                            ${budgetItems || '<div class="text-muted small text-center py-2">No budgets set</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/tools/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🛠️ SMART TOOLS</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">🛒 Smart Cart:</span><span class="text-white fw-bold">${data.tools.cart_count} items</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">💸 Debts:</span><span class="text-white fw-bold">${data.tools.debts_count} accounts</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">🧾 Auto-Pay Bills:</span><span class="text-white fw-bold">${data.tools.bills_count} active</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/tracker/')) {
+                    const trackerItems = data.tracker.map(t => `
+                        <div class="d-flex justify-content-between mb-1 small" style="font-size: 0.75rem;">
+                            <span class="text-truncate text-white" style="max-width: 160px;">${t.title}</span>
+                            <span class="text-success fw-bold">₹${t.price}</span>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🏷️ PRICE TRACKER</div>
+                            ${trackerItems || '<div class="text-muted small text-center py-2">No products tracked</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/taxes/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🧾 TAX HUB</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Freelance Shield:</span><span class="text-warning fw-bold">₹${data.taxes.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/investments/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📈 INVESTMENTS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Holdings:</span><span class="text-white fw-bold">${data.investments.holdings_count} active assets</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/splits/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">👥 SPLIT BILLS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Owed to Me:</span><span class="text-success fw-bold">₹${data.splits.total_owed}</span></div>
+                        </div>
+                    `;
+                }
+
+                if (dropdownHtml) {
+                    // Wrap the link in a container
+                    const container = document.createElement('div');
+                    container.className = 'nav-item-container';
+                    link.parentNode.insertBefore(container, link);
+                    container.appendChild(link);
+                    container.insertAdjacentHTML('beforeend', dropdownHtml);
+                }
+            });
+        })
+        .catch(err => console.error('Error loading navbar previews:', err));
+});
+</script>
+</body>
+</html>

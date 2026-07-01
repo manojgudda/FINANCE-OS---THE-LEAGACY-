@@ -1,0 +1,22 @@
+# Python/Django patterns
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+venv/
+.venv/
+env/
+.env
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

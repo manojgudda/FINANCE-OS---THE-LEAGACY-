@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceOS — Your Personal Finance OS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #050505; /* Deeper black */
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            padding: 1.25rem 0;
+        }
+        .brand-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            text-decoration: none;
+        }
+        
+        .text-accent {
+            color: #4ade80; /* Signature Neon Green */
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            padding: 100px 0 80px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .pill-badge {
+            background-color: #121212;
+            border: 1px solid #27272a;
+            color: #a1a1aa;
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            display: inline-block;
+        }
+
+        .hero-title {
+            font-size: 5.5rem; 
+            font-weight: 800;
+            letter-spacing: -2.5px;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-subtitle {
+            color: #a1a1aa; 
+            font-size: 1.15rem;
+            max-width: 650px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* Buttons */
+        .btn-custom-light {
+            background-color: #ffffff;
+            color: #000000;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: opacity 0.2s;
+            border: 1px solid #ffffff;
+        }
+        .btn-custom-light:hover {
+            opacity: 0.9;
+            color: #000000;
+        }
+
+        .btn-custom-dark {
+            background-color: transparent;
+            color: #ffffff;
+            border: 1px solid #27272a;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-custom-dark:hover {
+            background-color: #121212;
+            color: #ffffff;
+            border-color: #3f3f46;
+        }
+
+        .hero-buttons .btn-custom-light,
+        .hero-buttons .btn-custom-dark {
+            padding: 0.85rem 1.75rem;
+            font-size: 1rem;
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            background-color: #09090b; 
+            border: 1px solid #27272a; 
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            height: 100%;
+            transition: border-color 0.2s, transform 0.2s;
+            text-align: left;
+        }
+        .feature-card:hover {
+            border-color: #3f3f46;
+            transform: translateY(-3px);
+        }
+        .feature-icon {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            background-color: #18181b;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid #27272a;
+        }
+        .feature-card h5 {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .feature-card p {
+            color: #71717a; 
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="container navbar d-flex justify-content-between align-items-center mt-2">
+    <a href="#" class="brand-logo">Finance<span class="text-accent">OS</span></a>
+    <div>
+        <a href="{% url 'login' %}" class="btn-custom-dark me-3" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">Login</a>
+        <a href="{% url 'register' %}" class="btn-custom-light" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">Get Started</a>
+    </div>
+</nav>
+
+<div class="container hero-section">
+    <div class="pill-badge">The Ultimate Portfolio Project</div>
+    
+    <h1 class="hero-title">
+        Track money.<br>
+        <span class="text-accent">Beat your budget.</span>
+    </h1>
+    
+    <p class="hero-subtitle">
+        One powerful application for transactions, dynamic budgets, product price tracking, and smart cart management — all in one clean dark interface.
+    </p>
+    
+    <div class="hero-buttons d-flex gap-3">
+        <a href="{% url 'register' %}" class="btn-custom-light">Get Started — Free</a>
+        <a href="{% url 'login' %}" class="btn-custom-dark">Login</a>
+    </div>
+</div>
+
+<div class="container pb-5 mt-2">
+    <div class="row g-4 justify-content-center" style="max-width: 1000px; margin: 0 auto;">
+        
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">💸</div>
+                <h5>Transactions & GST</h5>
+                <p>Log income and expenses with automatic GST calculation and custom categorization.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h5>Smart Budgets</h5>
+                <p>Set limits and view your daily "Safe to Spend" metric to ensure you never overdraw.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h5>Recurring Bills</h5>
+                <p>Automatically log your Netflix, rent, and internet subscriptions on the 1st of every month.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">📦</div>
+                <h5>Price Tracker</h5>
+                <p>Paste a product URL and let our web scraper watch the price rise and fall in real-time.</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">🛒</div>
+                <h5>Affordability Cart</h5>
+                <p>Add items to your cart and instantly compare the total against your remaining disposable income.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h5>Live Analytics</h5>
+                <p>Visualize your financial health with real-time pie charts and bar graphs using MongoDB aggregation.</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

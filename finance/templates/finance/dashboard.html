@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — FinanceOS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        html { scrollbar-gutter: stable; }
+        body { background-color: #050505; color: #ffffff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        
+        /* Navbar */
+        .navbar { border-bottom: 1px solid #27272a; padding: 1rem 0; background-color: rgba(9, 9, 11, 0.8); backdrop-filter: blur(10px); margin-bottom: 2.5rem; position: sticky; top: 0; z-index: 1000;}
+        .brand-logo { font-size: 1.25rem; font-weight: 800; color: #ffffff; text-decoration: none; }
+        .text-accent { color: #4ade80; }
+        
+        /* High Contrast Fixes */
+        .text-muted { color: #a1a1aa !important; }
+        .badge-dark-custom { background-color: #18181b; color: #d4d4d8; border: 1px solid #3f3f46; padding: 0.3rem 0.6rem; border-radius: 6px; font-weight: 500; font-size: 0.8rem; }
+        
+        /* Buttons */
+        .btn-accent { background-color: #4ade80; color: #000; font-weight: 600; padding: 0.5rem 1.25rem; border-radius: 8px; border: none; transition: all 0.2s; }
+        .btn-accent:hover { background-color: #22c55e; transform: translateY(-1px); }
+        .btn-outline-dark-custom { border: 1px solid #27272a; color: #a1a1aa; background: transparent; padding: 0.5rem 1rem; border-radius: 8px; transition: 0.2s; }
+        .btn-outline-dark-custom:hover { color: #fff; background: #18181b; border-color: #3f3f46; }
+
+        /* Cards */
+        .card-custom { background-color: #09090b; border: 1px solid #27272a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; height: auto; }
+        .metric-title { font-size: 0.85rem; color: #a1a1aa; font-weight: 500; margin-bottom: 0.5rem; }
+        .metric-value { font-size: 2.25rem; font-weight: 800; letter-spacing: -1px; }
+
+        /* Transaction List */
+        .transaction-item { border-bottom: 1px solid #27272a; padding: 1rem 0; display: flex; justify-content: space-between; align-items: center; }
+        .transaction-item:last-child { border-bottom: none; }
+        .t-icon { width: 42px; height: 42px; border-radius: 12px; background-color: #18181b; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-right: 1rem; border: 1px solid #27272a; color: #a1a1aa;}
+        .badge-income { color: #4ade80; font-weight: 600; font-size: 1.05rem;}
+        .badge-expense { color: #f87171; font-weight: 600; font-size: 1.05rem;}
+        .t-date { color: #9ca3af; font-size: 0.85rem; margin-top: 0.2rem; }
+
+        /* Modal Customization */
+        .modal-content { background-color: #09090b; border: 1px solid #27272a; border-radius: 16px; }
+        .modal-header { border-bottom: 1px solid #27272a; }
+        .modal-title { font-weight: 700; }
+        .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+        .form-label { font-size: 0.85rem; color: #a1a1aa; }
+        .form-control, .form-select { background-color: #121212; border: 1px solid #27272a; color: white !important; padding: 0.75rem; border-radius: 8px; font-size: 0.95rem; }
+        .form-control:focus, .form-select:focus { background-color: #18181b; border-color: #4ade80; color: white; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar mb-5">
+    <div class="container d-flex justify-content-between align-items-center" style="max-width: 1200px; height: 40px;">
+        <div class="d-flex align-items-center">
+            <a href="{% url 'dashboard' %}" class="brand-logo me-4">Finance<span class="text-accent">OS</span></a>
+            <div class="d-flex gap-2">
+                <a href="{% url 'dashboard' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'dashboard' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'dashboard' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Dashboard</a>
+                <a href="{% url 'budgets' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'budgets' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'budgets' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Budgets</a>
+                <a href="{% url 'tools' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tools' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tools' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Smart Tools</a>
+                <a href="{% url 'tracker' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'tracker' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'tracker' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Price Tracker</a>
+                <a href="{% url 'taxes' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'taxes' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'taxes' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Tax Hub</a>
+                <a href="{% url 'investments' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'investments' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'investments' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Investments</a>
+                <a href="{% url 'splits' %}" class="btn btn-sm" style="{% if request.resolver_match.url_name == 'splits' %}background-color: #18181b; color: #ffffff; border: 1px solid #3f3f46; font-weight: 500;{% else %}background-color: transparent; color: #a1a1aa; border: 1px solid transparent; transition: 0.2s;{% endif %}" {% if request.resolver_match.url_name != 'splits' %}onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#a1a1aa'"{% endif %}>Split Bills</a>
+            </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3" style="height: 40px;">
+            <button type="button" class="btn-accent" data-bs-toggle="modal" data-bs-target="#transactionModal" style="font-size: 0.85rem; padding: 0.4rem 0.85rem; font-weight: 600; border-radius: 6px; border: none; background-color: #4ade80; color: #000; transition: all 0.2s;">
+                + New Transaction
+            </button>
+            <form method="POST" action="{% url 'logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm" style="border: 1px solid #27272a; color: #a1a1aa; background: transparent; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='#3f3f46'" onmouseout="this.style.color='#a1a1aa'; this.style.borderColor='#27272a'">Logout</button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container pb-5" style="max-width: 1200px;">
+    
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card-custom text-center h-100 d-flex flex-column justify-content-center m-0" style="position: relative; overflow: hidden;">
+                <div class="metric-title">Available to Spend</div>
+                <div class="metric-value">₹{{ total_balance|floatformat:0 }}</div>
+                {% if total_tax_shield_holding > 0 %}
+                    <div class="text-warning small mt-2" style="font-size: 0.8rem;">
+                        💼 Tax Shield: <strong class="text-white">₹{{ total_tax_shield_holding|floatformat:0 }}</strong> in holding
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-custom text-center h-100 d-flex flex-column justify-content-center m-0" style="background: linear-gradient(180deg, rgba(74, 222, 128, 0.05) 0%, rgba(9, 9, 11, 1) 100%);">
+                <div class="metric-title text-accent">Income</div>
+                <div class="metric-value text-accent">+₹{{ total_income|floatformat:0 }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-custom text-center h-100 d-flex flex-column justify-content-center m-0">
+                <div class="metric-title">Expenses</div>
+                <div class="metric-value">−₹{{ total_expense|floatformat:0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-lg-5">
+            
+            <div class="card-custom mb-4">
+                <h6 class="fw-bold mb-4">Spending Breakdown</h6>
+                {% if total_expense > 0 %}
+                    <div style="position: relative; height: 180px; width: 100%;">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center small py-5">Not enough data to generate chart.</p>
+                {% endif %}
+            </div>
+
+            <div class="card-custom mb-4" style="background: linear-gradient(145deg, #09090b 0%, #121212 100%);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0">Financial Health Score</h6>
+                    <span class="badge-dark-custom">50/30/20 Rule</span>
+                </div>
+                <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.5rem;">Calculated based on your savings rate and needs vs. wants.</p>
+                
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h2 class="fw-bold mb-0 {{ health_color }}">{{ health_score }}<span class="fs-6" style="color: #52525b;"> / 1000</span></h2>
+                    <span class="fw-bold {{ health_color }}">{{ health_status }}</span>
+                </div>
+                
+                <div class="progress mt-2 mb-3" style="height: 10px; background-color: #18181b; border: 1px solid #27272a; border-radius: 50px;">
+                    <div class="progress-bar {% if health_score >= 800 %}bg-success{% elif health_score >= 600 %}bg-warning{% else %}bg-danger{% endif %}" 
+                         style="width: {{ health_pct }}%; box-shadow: 0 0 10px rgba(255,255,255,0.2); border-radius: 50px;"></div>
+                </div>
+                <div class="d-flex justify-content-between" style="color: #52525b; font-size: 0.75rem;">
+                    <span>300 (Poor)</span>
+                    <span>1000 (Perfect)</span>
+                </div>
+            </div>
+
+
+            <div class="card-custom">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-bold mb-0">Live Budget Reports</h6>
+                    <a href="{% url 'budgets' %}" class="text-muted text-decoration-none small">Edit limits ➔</a>
+                </div>
+                
+                {% for b in budget_data %}
+                    <div class="d-flex justify-content-between mb-1" style="font-size: 0.85rem; color: #d4d4d8; font-weight: 500;">
+                        <span>{{ b.category }}</span>
+                        <span>₹{{ b.spent|floatformat:0 }} / ₹{{ b.limit|floatformat:0 }}</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px; background-color: #18181b; border-radius: 50px; border: 1px solid #27272a;">
+                        <div class="progress-bar {{ b.color }}" style="width: {{ b.percentage }}%"></div>
+                    </div>
+                {% empty %}
+                    <p class="text-muted small text-center my-4">No budgets configured yet. Visit the Budgets tab.</p>
+                {% endfor %}
+            </div>
+
+            <!-- Subscription Leakage Auditor Card -->
+            {% if ghost_subscriptions %}
+            <div class="card-custom mt-4" style="background: linear-gradient(135deg, rgba(25, 20, 10, 0.4) 0%, rgba(9, 9, 11, 0.8) 100%); border: 1px solid rgba(245, 158, 11, 0.15); backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); transition: transform 0.2s; cursor: default;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0 text-warning d-flex align-items-center gap-2">
+                        <span>⚠️</span> Subscription Leakage
+                    </h6>
+                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1" style="font-size: 0.75rem;">Leakage Alert</span>
+                </div>
+                <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.25rem;">We detected recurring payments with no category engagement in the last 30 days. You may want to cancel these:</p>
+                
+                <div class="d-flex flex-column gap-2">
+                    {% for ghost in ghost_subscriptions %}
+                        <div class="list-item d-flex justify-content-between align-items-center p-2 rounded" style="background-color: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.02);">
+                            <div>
+                                <span class="fw-bold text-white" style="font-size: 0.9rem;">{{ ghost.title }}</span>
+                                <div class="text-muted" style="font-size: 0.75rem;">Category: {{ ghost.category }}</div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="fw-bold text-danger" style="font-size: 0.9rem;">−₹{{ ghost.amount|floatformat:0 }}/mo</span>
+                                <button class="btn btn-sm btn-outline-danger py-1 px-2.5" style="font-size: 0.75rem; border-radius: 6px;" onclick="generateCancelEmail('{{ ghost.title }}', '{{ request.user.username }}', '{{ request.user.email }}')">Cancel Help</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <div class="col-lg-7">
+            <!-- Impulse Buy Reality Check Widget -->
+            <div class="card-custom mb-4" style="background: linear-gradient(135deg, rgba(24, 10, 10, 0.4) 0%, rgba(9, 9, 11, 0.8) 100%); border: 1px solid rgba(248, 113, 113, 0.15); backdrop-filter: blur(12px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); transition: transform 0.2s; cursor: default;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0 text-danger d-flex align-items-center gap-2">
+                        <span>🤔</span> Impulse Buy Reality Check
+                    </h6>
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1" style="font-size: 0.75rem;">Reality Check</span>
+                </div>
+                <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.25rem;">Before checking out, evaluate the true cost of this purchase in hours of work and financial score impact.</p>
+                
+                <form id="impulseForm" class="row g-2 mb-3">
+                    {% csrf_token %}
+                    <div class="col-md-5 col-12">
+                        <input type="text" id="impulseTitle" name="title" class="form-control form-control-sm" placeholder="Item Name (e.g., Headphones)" required style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <input type="number" id="impulsePrice" name="price" class="form-control form-control-sm" placeholder="Price (₹)" required min="1" step="0.01" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <select id="impulseCategory" name="category" class="form-select form-select-sm" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Food">🍔 Food & Dining</option>
+                            <option value="Transport">🚗 Transport</option>
+                            <option value="Bills">🧾 Bills & Utilities</option>
+                            <option value="Entertainment">🍿 Entertainment</option>
+                            <option value="Other">✨ Other</option>
+                        </select>
+                    </div>
+                    <div id="impulseCustomCategoryGroup" class="col-12 d-none mt-2">
+                        <input type="text" name="custom_category" class="form-control form-control-sm" placeholder="Specify Category (e.g., Go-Karting)" style="background-color: rgba(0,0,0,0.2); border-color: #27272a;">
+                    </div>
+                    <div class="col-12 mt-2">
+                        <button type="submit" class="btn btn-sm w-100" style="background: linear-gradient(90deg, #f87171 0%, #ef4444 100%); color: #000; font-weight: 700; border: none; border-radius: 8px; padding: 0.5rem; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Analyze Purchase</button>
+                    </div>
+                </form>
+
+                <div id="impulseResult" class="d-none p-3 rounded" style="background-color: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05);">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-12 border-end border-secondary border-opacity-25">
+                            <div class="mb-2">
+                                <span class="small text-muted d-block">Verdict</span>
+                                <span id="impulseVerdict" class="fw-bold fs-6"></span>
+                            </div>
+                            <div>
+                                <span class="small text-muted d-block">Time Cost</span>
+                                <span id="impulseHours" class="fw-bold text-white fs-5"></span>
+                                <span class="text-muted small d-block" style="font-size: 0.75rem;">of work to earn this</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12 ps-md-3">
+                            <div class="mb-2">
+                                <span class="small text-muted d-block">Financial Health Score</span>
+                                <span id="impulseHealth" class="fw-bold fs-6"></span>
+                            </div>
+                            <div>
+                                <span class="small text-muted d-block">Category Budget Impact</span>
+                                <span id="impulseBudget" class="fw-bold fs-6"></span>
+                                <div id="impulseBudgetProgressContainer" class="progress mt-2 d-none" style="height: 6px; background-color: #18181b; border-radius: 50px;">
+                                    <div id="impulseBudgetProgressBar" class="progress-bar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-custom">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h6 class="fw-bold mb-0">Recent Activity</h6>
+                    <a href="{% url 'transactions' %}" class="text-accent text-decoration-none small">View All Ledger ➔</a>
+                </div>
+                
+                {% if transactions %}
+                    <div>
+                        {% for t in transactions|slice:":8" %}
+                            <div class="transaction-item">
+                                <div class="d-flex align-items-center">
+                                    <div class="t-icon">
+                                        {% if t.category == 'Food' %}🍔
+                                        {% elif t.category == 'Transport' %}🚗
+                                        {% elif t.category == 'Shopping' %}🛍️
+                                        {% elif t.category == 'Bills' %}🧾
+                                        {% elif t.category == 'Entertainment' %}🍿
+                                        {% elif t.category == 'Salary' %}💰
+                                        {% else %}✨{% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold fs-6">{{ t.title }}</div>
+                                        <div class="t-date">
+                                            {{ t.date|date:"M d, Y" }} 
+                                            {% if t.gst_amount > 0 %} • <span style="color:#fbbf24;">+₹{{ t.gst_amount|floatformat:2 }} Tax</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="{% if t.type == 'income' %}badge-income{% else %}badge-expense{% endif %}">
+                                    {% if t.type == 'income' %}+{% else %}−{% endif %}₹{{ t.amount|floatformat:2 }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center my-5">No recent activity.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="transactionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title">Log a Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                
+                <div class="mb-4 p-3 rounded text-center" style="background-color: #121212; border: 1px dashed #3f3f46; position: relative;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-accent small fw-bold">✨ AI Vision Scanner</span>
+                        <span class="badge bg-dark text-muted" style="font-size: 0.7rem;">BETA</span>
+                    </div>
+                    
+                    <input type="file" id="receiptImage" class="d-none" accept="image/*">
+                    <button type="button" class="btn btn-sm w-100" style="background: #18181b; color: #d4d4d8; border: 1px solid #27272a;" onclick="document.getElementById('receiptImage').click()">
+                        📷 Upload Receipt Image
+                    </button>
+                    
+                    <div id="scanLoader" class="d-none mt-3 text-accent small fw-bold">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Extracting text & amounts...
+                    </div>
+                </div>
+                <hr style="border-color: #27272a; margin-bottom: 1.5rem;">
+
+                <form method="POST" action="{% url 'dashboard' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" id="transTitle" name="title" class="form-control" placeholder="e.g., Netflix, Salary" required>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Amount (₹)</label>
+                            <input type="number" id="transAmount" step="0.01" name="amount" class="form-control" placeholder="0.00" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Type</label>
+                            <select name="type" class="form-select">
+                                <option value="expense">Expense</option>
+                                <option value="income">Income</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-8">
+                            <label class="form-label">Category</label>
+                            <select id="modalCategory" name="category" class="form-select">
+                                <option value="Food">🍔 Food & Dining</option>
+                                <option value="Transport">🚗 Transport</option>
+                                <option value="Bills">🧾 Bills & Utilities</option>
+                                <option value="Shopping">🛍️ Shopping</option>
+                                <option value="Entertainment">🍿 Entertainment</option>
+                                <option value="Salary">💰 Salary</option>
+                                <option value="Other">✨ Other</option>
+                            </select>
+                            <div id="modalCustomCategoryGroup" class="d-none mt-2">
+                                <label class="form-label small text-muted">Specify Category</label>
+                                <input type="text" name="custom_category" class="form-control form-control-sm" placeholder="e.g., Go-Karting">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">GST Tax</label>
+                            <select name="gst" class="form-select">
+                                <option value="0">0%</option>
+                                <option value="5">5%</option>
+                                <option value="12">12%</option>
+                                <option value="18">18%</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="gigIncomeGroup" class="mb-4 d-none">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="isGig" name="is_gig" value="true">
+                            <label class="form-check-label text-warning small fw-bold" for="isGig">💼 Mark as Gig/Freelance Income</label>
+                        </div>
+                        <div id="taxWithholdingDiv" class="d-none">
+                            <label class="form-label small text-muted">Estimated Tax Withholding (%)</label>
+                            <input type="number" name="tax_withholding" class="form-control form-control-sm w-25" value="20" min="0" max="100">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-accent w-100 py-2">Save Transaction</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const typeSelect = document.querySelector('#transactionModal select[name="type"]');
+        const gigGroup = document.getElementById('gigIncomeGroup');
+        const isGigCheckbox = document.getElementById('isGig');
+        const taxDiv = document.getElementById('taxWithholdingDiv');
+
+        function setupCustomCategory(selectId, groupId) {
+            const select = document.getElementById(selectId);
+            const group = document.getElementById(groupId);
+            if (select && group) {
+                select.addEventListener('change', function() {
+                    if (this.value === 'Other') {
+                        group.classList.remove('d-none');
+                        group.querySelector('input').setAttribute('required', 'required');
+                    } else {
+                        group.classList.add('d-none');
+                        group.querySelector('input').removeAttribute('required');
+                        group.querySelector('input').value = '';
+                    }
+                });
+            }
+        }
+        setupCustomCategory('modalCategory', 'modalCustomCategoryGroup');
+        setupCustomCategory('impulseCategory', 'impulseCustomCategoryGroup');
+
+        if (typeSelect) {
+            typeSelect.addEventListener('change', function() {
+                if (this.value === 'income') {
+                    gigGroup.classList.remove('d-none');
+                } else {
+                    gigGroup.classList.add('d-none');
+                    isGigCheckbox.checked = false;
+                    taxDiv.classList.add('d-none');
+                }
+            });
+        }
+
+        if (isGigCheckbox) {
+            isGigCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    taxDiv.classList.remove('d-none');
+                } else {
+                    taxDiv.classList.add('d-none');
+                }
+            });
+        }
+    });
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.getElementById('receiptImage').addEventListener('change', function(e) {
+        let file = e.target.files[0];
+        if (!file) return;
+
+        // Show the loading spinner
+        let loader = document.getElementById('scanLoader');
+        loader.classList.remove('d-none');
+
+        // Create the form data package
+        let formData = new FormData();
+        formData.append('receipt', file);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        // Send to Django silently via Fetch API
+        fetch("{% url 'scan_receipt' %}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            loader.classList.add('d-none'); // Hide spinner
+            
+            if (data.success) {
+                // Auto-fill the form inputs!
+                document.getElementById('transTitle').value = data.title;
+                document.getElementById('transAmount').value = data.amount;
+                
+                Swal.fire({ title: "Scan Complete!", text: "AI successfully extracted the receipt details.", icon: "success", background: '#09090b', color: '#ffffff', confirmButtonColor: '#4ade80', timer: 2000, showConfirmButton: false });
+            }
+        });
+    });
+</script>
+
+{% if total_expense > 0 %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        const labels = {{ chart_labels|safe }};
+        const data = {{ chart_data|safe }};
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: ['#4ade80', '#60a5fa', '#f87171', '#fbbf24', '#c084fc', '#a1a1aa'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#a1a1aa', font: { family: 'Inter' } } }
+                },
+                cutout: '75%'
+            }
+        });
+    });
+</script>
+{% endif %}
+
+<script>
+    document.getElementById('impulseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let title = document.getElementById('impulseTitle').value;
+        let price = document.getElementById('impulsePrice').value;
+        let category = document.getElementById('impulseCategory').value;
+        let customCategory = document.querySelector('#impulseCustomCategoryGroup input').value;
+        let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        let formData = new FormData();
+        formData.append('title', title);
+        formData.append('price', price);
+        formData.append('category', category);
+        formData.append('custom_category', customCategory);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+        
+        fetch("{% url 'impulse_check' %}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('impulseResult').classList.remove('d-none');
+                
+                // Set Verdict
+                let verdictEl = document.getElementById('impulseVerdict');
+                verdictEl.innerText = data.verdict;
+                if (data.verdict_type === 'safe') {
+                    verdictEl.className = 'fw-bold fs-6 text-success';
+                } else if (data.verdict_type === 'warning') {
+                    verdictEl.className = 'fw-bold fs-6 text-warning';
+                } else {
+                    verdictEl.className = 'fw-bold fs-6 text-danger';
+                }
+                
+                // Set Hours
+                document.getElementById('impulseHours').innerText = data.hours_required.toFixed(1) + ' hrs';
+                
+                // Set Health Impact
+                let healthEl = document.getElementById('impulseHealth');
+                healthEl.innerText = data.current_score + ' ➔ ' + data.projected_score + ' (' + (data.projected_score - data.current_score) + ' pts)';
+                if (data.projected_score < data.current_score) {
+                    healthEl.className = 'fw-bold text-danger';
+                } else {
+                    healthEl.className = 'fw-bold text-success';
+                }
+                
+                // Set Budget Impact
+                let budgetEl = document.getElementById('impulseBudget');
+                let progressContainer = document.getElementById('impulseBudgetProgressContainer');
+                let progressBar = document.getElementById('impulseBudgetProgressBar');
+                
+                if (data.budget_limit > 0) {
+                    budgetEl.innerText = data.current_spent_pct.toFixed(0) + '% ➔ ' + data.projected_spent_pct.toFixed(0) + '%';
+                    progressContainer.classList.remove('d-none');
+                    
+                    let percentage = Math.min(data.projected_spent_pct, 100);
+                    progressBar.style.width = percentage + '%';
+                    
+                    if (data.projected_spent_pct > 100) {
+                        budgetEl.className = 'fw-bold text-danger';
+                        progressBar.className = 'progress-bar bg-danger';
+                    } else if (data.projected_spent_pct > 70) {
+                        budgetEl.className = 'fw-bold text-warning';
+                        progressBar.className = 'progress-bar bg-warning';
+                    } else {
+                        budgetEl.className = 'fw-bold text-success';
+                        progressBar.className = 'progress-bar bg-success';
+                    }
+                } else {
+                    budgetEl.innerText = 'No budget set for ' + category;
+                    budgetEl.className = 'fw-bold text-muted';
+                    progressContainer.classList.add('d-none');
+                }
+            } else {
+                Swal.fire({ title: "Error", text: data.error, icon: "error", background: '#09090b', color: '#ffffff', confirmButtonColor: '#f87171' });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>
+
+<!-- Cancellation Email Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #09090b; border: 1px solid #27272a; color: #ffffff;">
+            <div class="modal-header border-bottom border-secondary border-opacity-25">
+                <h5 class="modal-title fw-bold text-danger">✉️ Cancellation Email Draft</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Copy this template to send to the vendor's support team:</p>
+                <textarea id="cancelEmailText" class="form-control bg-black text-white border-secondary border-opacity-50" rows="10" readonly style="font-family: monospace; font-size: 0.9rem;"></textarea>
+            </div>
+            <div class="modal-footer border-top border-secondary border-opacity-25">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-sm btn-accent" onclick="copyCancelEmail()">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function generateCancelEmail(vendor, username, email) {
+        const today = new Date().toLocaleDateString();
+        const emailBody = `Subject: Cancel My Subscription - ${vendor}
+
+Date: ${today}
+
+Dear ${vendor} Support Team,
+
+I am writing to request the immediate cancellation of my subscription and any recurring charges associated with my account.
+
+Account Details:
+- Name: ${username}
+- Associated Email: ${email || username + '@gmail.com'}
+
+Please stop all future billing and send me a confirmation email once the cancellation has been processed.
+
+Thank you for your prompt assistance.
+
+Sincerely,
+${username}`;
+
+        document.getElementById('cancelEmailText').value = emailBody;
+        const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+        modal.show();
+    }
+
+    function copyCancelEmail() {
+        const textarea = document.getElementById('cancelEmailText');
+        textarea.select();
+        document.execCommand('copy');
+        Swal.fire({
+            title: "Copied!",
+            text: "Cancellation email copied to clipboard.",
+            icon: "success",
+            background: '#09090b',
+            color: '#ffffff',
+            confirmButtonColor: '#4ade80',
+            timer: 1500,
+            showConfirmButton: false
+        });
+    }
+</script>
+
+{% if messages %}
+    <script>
+        {% for message in messages %}
+            Swal.fire({ title: "Success!", text: "{{ message }}", icon: "success", background: '#09090b', color: '#ffffff', confirmButtonColor: '#4ade80', timer: 2000, showConfirmButton: false });
+        {% endfor %}
+    </script>
+{% endif %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Inject CSS for hover dropdowns
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .nav-item-container {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-preview-dropdown {
+            display: block;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            width: 280px;
+            background: linear-gradient(135deg, #09090b 0%, #121215 100%);
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 2000;
+            text-align: left;
+            margin-top: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .nav-item-container:hover .nav-preview-dropdown {
+            pointer-events: auto;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .nav-preview-dropdown hr {
+            border-color: #27272a;
+            margin: 0.5rem 0;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Fetch preview data
+    fetch('/api/nav-preview/')
+        .then(response => response.json())
+        .then(data => {
+            // Find all navbar links
+            const links = document.querySelectorAll('.navbar a.btn-sm, .navbar a.btn');
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+                let dropdownHtml = '';
+                
+                if (href.includes('/dashboard/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">💼 DASHBOARD PREVIEW</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">Available:</span><span class="text-white fw-bold">₹${data.dashboard.balance}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-success">Income:</span><span class="text-success fw-bold">+₹${data.dashboard.income}</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-danger">Expenses:</span><span class="text-danger fw-bold">−₹${data.dashboard.expense}</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-warning">Tax Shield:</span><span class="text-warning fw-bold">₹${data.dashboard.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/budgets/')) {
+                    const budgetItems = data.budgets.map(b => `
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small mb-1" style="font-size: 0.75rem;">
+                                <span class="text-white">${b.category}</span>
+                                <span class="text-muted">₹${b.spent}/₹${b.limit}</span>
+                            </div>
+                            <div class="progress" style="height: 4px; background: #18181b;">
+                                <div class="progress-bar ${b.pct > 90 ? 'bg-danger' : b.pct > 70 ? 'bg-warning' : 'bg-success'}" style="width: ${b.pct}%"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📊 BUDGETS PREVIEW</div>
+                            ${budgetItems || '<div class="text-muted small text-center py-2">No budgets set</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/tools/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🛠️ SMART TOOLS</div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">🛒 Smart Cart:</span><span class="text-white fw-bold">${data.tools.cart_count} items</span></div>
+                            <div class="d-flex justify-content-between mb-1 small"><span class="text-muted">💸 Debts:</span><span class="text-white fw-bold">${data.tools.debts_count} accounts</span></div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">🧾 Auto-Pay Bills:</span><span class="text-white fw-bold">${data.tools.bills_count} active</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/tracker/')) {
+                    const trackerItems = data.tracker.map(t => `
+                        <div class="d-flex justify-content-between mb-1 small" style="font-size: 0.75rem;">
+                            <span class="text-truncate text-white" style="max-width: 160px;">${t.title}</span>
+                            <span class="text-success fw-bold">₹${t.price}</span>
+                        </div>
+                    `).join('');
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🏷️ PRICE TRACKER</div>
+                            ${trackerItems || '<div class="text-muted small text-center py-2">No products tracked</div>'}
+                        </div>
+                    `;
+                } else if (href.includes('/taxes/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">🧾 TAX HUB</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Freelance Shield:</span><span class="text-warning fw-bold">₹${data.taxes.tax_shield}</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/investments/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">📈 INVESTMENTS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Holdings:</span><span class="text-white fw-bold">${data.investments.holdings_count} active assets</span></div>
+                        </div>
+                    `;
+                } else if (href.includes('/splits/')) {
+                    dropdownHtml = `
+                        <div class="nav-preview-dropdown">
+                            <div class="small text-muted mb-2 fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">👥 SPLIT BILLS</div>
+                            <div class="d-flex justify-content-between small"><span class="text-muted">Owed to Me:</span><span class="text-success fw-bold">₹${data.splits.total_owed}</span></div>
+                        </div>
+                    `;
+                }
+
+                if (dropdownHtml) {
+                    // Wrap the link in a container
+                    const container = document.createElement('div');
+                    container.className = 'nav-item-container';
+                    link.parentNode.insertBefore(container, link);
+                    container.appendChild(link);
+                    container.insertAdjacentHTML('beforeend', dropdownHtml);
+                }
+            });
+        })
+        .catch(err => console.error('Error loading navbar previews:', err));
+});
+</script>
+</body>
+</html>
