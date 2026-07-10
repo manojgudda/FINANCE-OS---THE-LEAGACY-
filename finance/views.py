@@ -947,15 +947,20 @@ def scan_receipt(request):
 def impulse_check(request):
     if request.method == 'POST':
         try:
+            title = request.POST.get('title', '').strip()
+            if not title:
+                raise ValueError("Please enter the item name.")
+                
             price = float(request.POST.get('price', 0))
+            if price <= 0:
+                raise ValueError("Please enter a valid price greater than zero.")
+                
             category = request.POST.get('category', 'Other')
             if category == 'Other':
                 custom = request.POST.get('custom_category', '').strip()
-                if custom:
-                    category = custom
-            title = request.POST.get('title', 'Proposed Item').strip()
-            if price <= 0:
-                raise ValueError("Price must be greater than zero.")
+                if not custom:
+                    raise ValueError("Please specify the custom category name.")
+                category = custom
         except ValueError as e:
             return JsonResponse({'success': False, 'error': str(e) or 'Invalid price.'})
 

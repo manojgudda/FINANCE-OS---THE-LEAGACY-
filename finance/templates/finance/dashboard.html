@@ -207,6 +207,8 @@
                 </div>
                 <p style="color: #a1a1aa; font-size: 0.85rem; margin-bottom: 1.25rem;">Before checking out, evaluate the true cost of this purchase in hours of work and financial score impact.</p>
                 
+                <div id="impulseError" class="alert alert-danger d-none mb-3 py-2 px-3 small" style="border: 1px solid rgba(248, 113, 113, 0.2); background-color: rgba(248, 113, 113, 0.05); color: #f87171; border-radius: 8px;"></div>
+                
                 <form id="impulseForm" class="row g-2 mb-3">
                     {% csrf_token %}
                     <div class="col-md-5 col-12">
@@ -521,15 +523,37 @@
     document.getElementById('impulseForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        let title = document.getElementById('impulseTitle').value;
-        let price = document.getElementById('impulsePrice').value;
+        let errorEl = document.getElementById('impulseError');
+        let resultEl = document.getElementById('impulseResult');
+        errorEl.classList.add('d-none');
+        resultEl.classList.add('d-none');
+        
+        let title = document.getElementById('impulseTitle').value.trim();
+        let priceRaw = document.getElementById('impulsePrice').value;
+        let price = parseFloat(priceRaw);
         let category = document.getElementById('impulseCategory').value;
-        let customCategory = document.querySelector('#impulseCustomCategoryGroup input').value;
+        let customCategory = document.querySelector('#impulseCustomCategoryGroup input').value.trim();
         let csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        if (!title) {
+            errorEl.innerText = "Please enter the item name.";
+            errorEl.classList.remove('d-none');
+            return;
+        }
+        if (isNaN(price) || price <= 0) {
+            errorEl.innerText = "Please enter a valid price greater than zero.";
+            errorEl.classList.remove('d-none');
+            return;
+        }
+        if (category === 'Other' && !customCategory) {
+            errorEl.innerText = "Please specify the custom category name.";
+            errorEl.classList.remove('d-none');
+            return;
+        }
         
         let formData = new FormData();
         formData.append('title', title);
-        formData.append('price', price);
+        formData.append('price', priceRaw);
         formData.append('category', category);
         formData.append('custom_category', customCategory);
         formData.append('csrfmiddlewaretoken', csrfToken);
@@ -541,7 +565,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById('impulseResult').classList.remove('d-none');
+                resultEl.classList.remove('d-none');
                 
                 // Set Verdict
                 let verdictEl = document.getElementById('impulseVerdict');
@@ -594,11 +618,14 @@
                     progressContainer.classList.add('d-none');
                 }
             } else {
-                Swal.fire({ title: "Error", text: data.error, icon: "error", background: '#09090b', color: '#ffffff', confirmButtonColor: '#f87171' });
+                errorEl.innerText = data.error;
+                errorEl.classList.remove('d-none');
             }
         })
         .catch(error => {
             console.error('Error:', error);
+            errorEl.innerText = "An unexpected error occurred. Please try again.";
+            errorEl.classList.remove('d-none');
         });
     });
 </script>
